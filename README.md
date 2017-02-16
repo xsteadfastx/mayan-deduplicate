@@ -2,7 +2,7 @@
 
 ** NO WARRANTY FOR ANYTHING!!! **
 
-This is a little script to search for duplicates in [Mayan EDMS](http://mayan-edms.com/) and to delete them through their API. 
+This is a little script to search for duplicates in [Mayan EDMS](http://mayan-edms.com/) and delete them through their API. 
 
 ## Usage
 

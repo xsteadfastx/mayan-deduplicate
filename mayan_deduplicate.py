@@ -23,13 +23,13 @@ def get_document_list(url, username, password, path):
     :type username: str
     :type password: str
     :type path: str
-    :returns: List with documents
-    :rtype: list[dict]
+    :returns: Generator that returns document dict
+    :rtype: dict
     """
-    docs = []
     api_url = f'{url}/api/documents/documents?json'
 
     while api_url:
+
         r = requests.get(
             api_url,
             auth=HTTPBasicAuth(
@@ -38,27 +38,44 @@ def get_document_list(url, username, password, path):
             )
         )
 
-        docs.extend(
-            [
-                {
-                    'file': os.path.join(
-                        path,
-                        'document_storage',
-                        i['latest_version']['file']
-                    ),
-                    'id': i['id'],
-                    'date_added': i['date_added'],
-                    'description': i['description'],
-                    'document_type_label': i['document_type_label'],
-                    'label': i['label'],
-                }
-                for i in r.json()['results']
-            ]
-        )
+        for result in r.json()['results']:
+
+            yield {
+                'file': os.path.join(
+                    path,
+                    'document_storage',
+                    result['latest_version']['file']
+                ),
+                'id': result['id'],
+                'date_added': result['date_added'],
+                'description': result['description'],
+                'document_type_label': result['document_type_label'],
+                'label': result['label'],
+            }
 
         api_url = r.json()['next']
 
-    return docs
+
+def get_count(url, username, password):
+    """Get document count from Mayan API.
+
+    Used for progressbar.
+
+    :param url: Mayan EDMS URL
+    :param username: Mayan EDMS admin username
+    :param password: Mayan EDMS admin password
+    :type url: str
+    :type username: str
+    :type password: str
+    :returns: Total number of pages to get
+    :rtype: int
+    """
+    api_url = f'{url}/api/documents/documents?json'
+
+    return requests.get(
+        api_url,
+        auth=HTTPBasicAuth(username, password)
+    ).json()['count']
 
 
 def get_sizes(documents):
@@ -142,7 +159,13 @@ def get_duplicates(url, username, password, path):
     :rtype: list[list[dict]]
     """
     click.echo('getting documents...')
-    documents = get_document_list(url, username, password, path)
+    with click.progressbar(
+            get_document_list(url, username, password, path),
+            length=get_count(url, username, password)
+    ) as bar:
+        documents = []
+        for i in bar:
+            documents.append(i)
 
     click.echo('getting filesize duplicates...')
     documents_with_size = get_sizes(documents)

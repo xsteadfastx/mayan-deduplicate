@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name='mayan-deduplicate',
-    version='0.0.1',
+    version='0.0.2',
     py_modules=['mayan_deduplicate'],
     install_requires=[
         'click>=6.7.0',

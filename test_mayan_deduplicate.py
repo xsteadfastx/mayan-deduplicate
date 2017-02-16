@@ -35,13 +35,13 @@ def test_get_document_list(mock_requests, config):
         ]
     }
 
-    assert mayan_deduplicate.get_document_list(
+    for i in mayan_deduplicate.get_document_list(
         config['url'],
         config['username'],
         config['password'],
         config['path']
-    ) == [
-        {
+    ):
+        assert i == {
             'file': '/tmp/document_storage/0af05143-b7d2',
             'id': 4,
             'date_added': '2017-02-13T09:17:35.832975Z',
@@ -49,7 +49,6 @@ def test_get_document_list(mock_requests, config):
             'document_type_label': 'Krankenrechnungen',
             'label': 'imgtopdf_generated_1202171043056.pdf',
         }
-    ]
 
 
 def test_get_sizes(config, tmpdir):
